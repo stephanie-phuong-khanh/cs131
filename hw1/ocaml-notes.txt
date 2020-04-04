@@ -1,0 +1,136 @@
+first_rule_right
+- : (awksub_nonterminals, string) symbol list = [T "("; N Expr; T ")"]
+
+- : (awksub_nonterminals, string) symbol list = [N Expr]
+
+- : awksub_nonterminals list = [Expr]
+
+
+use "hw1.ml";;
+#use "hw1test.ml";;
+
+let rec remove target list =
+    match list with
+    | [] -> []
+    | list_head::list_tail ->
+        if list_head = target
+        then list_tail
+        else list_head::remove target list_tail
+
+
+Variable it whose value is always value of last expression typed in:
+    - 1 + 2 * 3 ;
+    val it = 7 : int
+
+Two numeric types
+    - 1234;
+    val it = 1234 : int
+    - 123.4;
+    val it = 123.4 : real
+
+Negative 1 is ~1
+
+Boolean values (true not True or TRUE because case-sensitive)
+    - true;
+    val it = true : bool
+    - false;
+    val it = false : bool
+
+Strings and character constant
+    - "H";
+    val it = "H" : string
+    - #"H";
+    val it = #"H" : char
+
+orelse and andalso -> short circuiting
+    - 1 < 2 orelse 3 > 4;
+    val it = true : bool
+    - 1 < 2 andalso not (3 < 4);
+    val it = false : bool
+
+OPERATOR PRECEDENCE
+    not, -
+    *, /, div, mod
+    +, -, ^
+    <, >, <=, >=, =, <>
+    andalso
+    orelse
+
+overload = same operator works differently on different types of operands
+    - 1.0 * 2;          => type error
+    does not automatically convert one type to another
+
+Parentheses
+    (f) 1, (f)(1), (f 1), f 1 all the same
+Left-associative
+    f a+1 means apply f to a, then add 1 --> must say f(a+1)
+    f(g(1)) is same as f(g 1)
+
+Variable definition with `val`
+    - val x = 1 + 2 * 3;
+    val x = 7 : int
+    - x
+    val x = 7 : int
+    - val y = if x = 7 then 1.0 else 2.0;
+    val y = 1.0 : real
+    - val x = true;             => does not overwrite previous definition, simply adds new definition on top of previous
+    val x = true : bool
+
+Expects keyboard input to be a series of definitions like val definitions.
+If type in exp only, ML thinks you typed `val it = exp`
+
+Tuple = two or more expressions put together, separated by commas, inside parentheses
+* means type constructor
+    - val barney = (1 + 2 , 3.0 * 4.Q , "brown") ;
+    val barney = (3,12.0,"brown") : int * real * string
+    - val point1 = ("red", (300,200)) ;
+    val point1 = ("red", (300,200)) : string * (int * int)
+    - #2 barney
+    val it = 12.0 : real
+    - #1 (#2 point1)
+    val it = 300 : int
+
+List = all elements must be of same type, using square brackets
+    - [1, 2, 3];
+    val it = [1,2,3] : int list
+    - [];
+    val it = [] : 'a list       --> empty list in ML is either [] or nil 
+    - nil;
+    val it = [] : 'a list       --> names that start with apostrophe = type variables (unknown type)
+
+Concatenate lists with @
+    - [1, 2, 3] @ [4, 5, 6]
+    val it = [1,2,3,4,5,6] : int list
+
+Cons operator ::
+    - 1::[2,3]
+    val it = [1,2,3] : int list
+    - val x = #"c" :: [];
+    val x = [#"c"] : char list
+Right associative 
+    - val x = 1::2::3::[];
+    val x = [1,2,3] : int list
+    - hd x;
+    val it = 1 : int
+    - tl x;
+    val it = [2,3] : int list
+
+Explode: string -> char list
+    - explode "hello";
+    val it = [#"h",#"e",#"l", #"l",#"o"] : char list
+Implode: char list -> string
+    - implode [#"h",#"e",#"l", #"l",#"o"];
+    val it = "hello" : string
+
+
+FUNCTIONS   <fun-def> ::= fun <function-name> <parameter> = <expression> ;
+    - fun firstChar s = hd (explode s);
+    val firstChar = fn : string -> char                         -> is a type constructor, a->b is type of the function
+    - firstChar "abc";
+    val it = #"a" : char
+
+Polymorphic function = allows parameters of different types
+    - fun length x = if null x then 0 else 1 + length (t1 x);
+    val length = fn : 'a list -> int
+
+
