@@ -1,0 +1,28 @@
+subset a b: Recursively checks every element in sub a to check its 
+existence in set b with List.mem function.
+
+equal_sets a b: Checks if a and b are equal by checking if a is a subset
+of b and if b is a subset of a, using written subset function.
+
+set_diff a b: Recursively checks every element in set a to check that it
+does not exist in set b, using List.mem similar to in subset function.
+
+set_union a b: Concatenates set a and set b-a found with set_diff function.
+
+set-intersection a b: Intersection of set a and set b is the union of set a
+and set b without set a-b and set b-a, leaving only the elements that exist
+in both sets.
+
+computed_fixed_point eq f x: Applies function f to x, checking the result's
+equality to x, recursively applying f to the result until it is found to be
+equal to x. 'To be equal' is determined by the eq argument, which would measure
+equality if eq were specifically (=).
+
+filter_reachable g: calls grammar_cfp helper function, which repeatedly calls
+find_reachable_rules helper function on list of rules and list of reachable
+symbols, until the reachable_symbols list stops growing, signifying the end of
+the search.
+    find_reachable_rules params: unpacks reachable_symbols list and rules list,
+    recursively checking each rule in the rules list, appends the nonterminal
+    symbols on the right hand side to the reachable_symbols list if the rule on
+    on the left hand side is in the reachable_symbols list.
