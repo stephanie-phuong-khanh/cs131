@@ -1,0 +1,180 @@
+    Is a represented via big-endian of little-endian approach?
+    That's determined not b y 'short'; it's determined by 'short' + look at the machine you're running on.
+        x86-64 = little-endian
+        SPARC = big-endian
+
+Explicit vs implicit Binding
+    explicit - you write explicitly in program
+        int a = 12
+    implicit - implied by something else you write
+        DO1OI = 1.5         // in original Fortran, compiler declared identifier for you - DO10I was auto declared A-HO-Z were floats
+
+    But the C/C++ preprocessor still uses implicit bindings
+
+    #define FOO 27
+    #ifdef FOO
+        some code here
+    #endif
+    #if FOO==27     //FOO defaults to the value zero because it's not defined
+        other code here
+    #endif
+
+    Q. Is OCaml type inference implicit?
+    A. yes, mostly
+
+Binding itme
+    The time during compilation and/or execution when a name becomes bound to a value.
+        int a = 10; //global variable
+    a became bound to 'int' when you wrote the program.
+        program authorship time
+    'int''s representation became bound to 4-byte little-endian when the ABI fr x86-64 was decided
+    &a became bound to (int *) 0xc0f0000 (or whatever)
+    when the program was linked ('gcc foo.c' invokes ld which creates a.out)
+    If 'int f (void) {int a = 10; ...;}';
+    &a becomes bound when f is entered via procedure call
+
+    a = 15     
+    rebinds a's value but doesn't change a's type of address. This rebinding occurs during execution whenever a is assigned to. Plus, this kind of rebinding doesn't occur in the OCaml subset that we use for HW1 and 2!
+
+    side effects are more general than this.
+        clock_settimeofday is a function that changes your hardware clock_settimeofday
+        anything visible the user is a side effect in some sense
+
+Types
+    what is a type?     'int a = 12;'       'int' is a type!
+
+    * One definition:
+        A type is a set of values
+        A type is a set of objects (in OO language)
+
+    I'm not saying { 23, 3.5, 'abc', NULL } is a type.
+    The language can specifiy sets of values and call them types and maybe it can let programmers do the same.
+
+    Are these sets mutually exclusive? Does value belong to exactly one type?
+        True for some languages, false for others.
+        True for traditional Lisp (Scheme)
+        False for OO languages with inheritance (child is subtype of parent)
+
+    * Another definition:
+        A type is a way to represent a set of values in a machine.
+
+            primitive types
+                int, cahr, float, etc. - you know how it's represented (if you're an expert)
+
+            constructed types
+                struct complex {double re, double im;}
+                specifies the layout of a new type 'struct complex'
+                struct complex c;
+                c.re = 1.3;
+                c.im = 4.7;
+
+    * Third definition: (most popular in OO languages)
+        A type is a set of values along with a set of operations on those values. Operations allow you to observe properties of the vlaues and also to perform actions on the objects (these actions may have side effects)
+
+            class {
+                double re;
+                double im;
+
+                //methods are part of the type
+                souble dist () { return sqrt (re*re + im*im); }
+            }
+
+    * Let's look at 'float' in C or C++ or Java or Python...
+        It's a set of values:
+            0.0, 1.0, 0.5, ...
+        It's a way to represent a set of values in a machine.
+        It's primitive, so C/++ standards won't tell you the exact representation.
+            For many years, it was quite vague because wanted to support IEEE, IBM mainfram, Unisys, ...
+            Nowadays, it's IEEE-754 world.
+            You recall this from CS 33!
+
+            float 1-bit s, 8-bit e, 23-bit f (32 bits total)
+                f is the *fraction*, not the mantissa
+                f is a 23-bit number
+            Represents ±2**(e-127) * 1.f when 0<e<255
+                say, f is 011101010..1010 (23 bits)
+                e is 52
+                so ±2**(52-127)*1.011101010..101
+
+                ± is + if s==0, - if s==1
+
+            If e==0, then it represents ±2**(-126) * 0.f
+                These the "tiny" numbers; they're not normalized
+
+            If e==255, f==0, it represents ±infinity (not a huge finite number)
+
+            If e==255, f!=0 it's a NaN (Not a Number)/
+                inf - inf yields a NaN
+                0.0 / 0.0 yields a NaN
+            
+        This is complicated! This type should be simple, but there are several special cases.
+            e==s==f==0 -> 0
+            e==f==0, s==1 -> -0
+            Two flavors of zero! Can cause confusion
+
+            Two different bit patterns but they compare equal.
+                * Dif bit pattern!
+                float f = 0; 
+                float g = -f;
+                if (f==g)
+                    This is true.
+                if (memcmp (&f, &g, sizeof f) == 0)
+                    This is false.
+            
+                * Same bit pattern, dif object equality!
+                float h = 0.0/0.0; // a NaN (never compares equal to anything not even itself)
+                float i = h;
+                (h == i) //false
+                (memcmp (&h, &i, sizeof h) == 0) //true
+
+        Why all this complexity in what should be a simple data type?
+            The problem is exception handling. In particular, what happens when a floating point operation cannot return the correct answer?
+            * overflow      1e308 * 1e308 -> exponent is too large
+            * underflow     1e-307 * 1e-307 -> exponent is too small
+            * bad args      0.0 / 0.0, sqrt(-1.0) -> no good real answer
+            * inexact       1.0 / 10.0 -> answer is not exactly right
+
+            x84-64 HW can trap on any of these errors. Set the right flags -> traps on any of these mistakes -> OS can take control. But almost nobody does so.
+
+            Traditionally, hardware would track on overflow, underflow, bad args, and for inexact it would silently round.
+            
+            Nowadays, most programs just charge ahead and use those special values : infinities and NaNs
+
+            This is a common way to deal with exceptional cases:
+                - don't throw an exception
+                - instead, return an *exceptional value* (still of type 'float') 
+
+            Trap - hardware checks for overflow, etc. and invokes kernal or some othr well-known software location
+                fmul acts like "if overflow then goto trap handler" as well as mul
+                simplified program because no more conditional jumps
+                complicates program because exceptional control flow is still there
+            Machine learning apps do countless FP ops -> we don't want to trap 
+
+Uses of types to address these sorts of issues
+    - Annotation
+        - Types document your program. 'int i;'
+        - Compiler can use these annotations to generate better code.
+        - Compiler can use them to report silly errors.
+    - Inference
+        - classic bottom-up inference
+         (3 + 4.5 + 'a')
+         int  double  int
+         double
+              double
+        - top-down inference (look at type wanted -> infer type of expression you see)
+        OCaml:      [3;4;-5] = []
+        Since type of LHS is int list, infer that type of RHS is int list.
+                    [3;4;-5] = (f y z)
+        tells us something about the type of y and z.
+
+Type checking
+    Static vs dynamic
+        1) static - before the program is done (typically at compile time when converted into machine code)
+            C, C++, OCaml, Java - big (complex) software where reliability is important
+        2) dynamic - as the program runs (runtime checking)
+            Python, sh, JavaScript - smaller programs where reliability is perhaps not so important; flexibility and ease of use matters most
+        
+        It's not an either-or; it's also a spectrum because some languages are mixed-use.
+            e.g. Java lets you do dynamic checking if you like; it's "second class" operation, not intended for general use, many programmers say "don't do that"
+
+        

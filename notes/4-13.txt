@@ -1,0 +1,89 @@
+
+* Software construction for programming languages
+    * (1) Conventional/traditional languages C++, C, Fortran
+        * foo.c (C source) -> sexing
+            * C source tokens -> parsing
+            * Parse tree -> checking (identifiers, type)
+            * Checked parse tree -> intermediate code generation
+            * Intermediate code (machine independent) -> optimization
+            * Optimized intermediate code (“ “) -> machine code generation
+            * Assembly languages -> xxxxasxxxx gas
+            * .o file -> ld
+            * a.out -> loaded in by kernel 
+            * Run
+        * Each phase can be separate program
+        * Can replace programs we don’t like
+        * Pioneered at Bell Labs as part of Unix in 1970s
+    * (2) IDE
+        * Eclipse, Emacs, etc.
+        * Pioneered at Xerox PARC in 1970s
+        * Smalltalk:
+            * One big happy program
+            * Controls your screen, keyboard, mouse
+            * Written in smalltalk
+            * Implements your IDE
+            * Edit program -> modified program continues to run
+    * Reality is that there’s a spectrum here. For example, EMACS is written in C, complied by gcc, then bootstraps into an IDE
+* Compilers vs interpretors
+    * Conventional model is that of a compiler: translates source to machine code. e.g. write i*=2 and machine executes shl %rax
+        * If you know how it works, you can debug relatively easily. Most programmers don’t
+    * Other model: an interpreter
+        * Leaves program in a form close to the original source
+        * Discard comments; or a checked parse tree; machine independent intermediate code - code designed for an abstract machine that’s easy to understand;
+        * Makes program easier to debug - a debugger can explain what’s going on to a developer fairly easier because compiler’s machine code can be hard to relate to programmer-written code
+        * Interpreters are easier to write and maintain than compilers are
+        * BUT interpreted code is slower, just to fetch and decode the next interpreted instruction might take the interpreter 10 machine instructions
+    * We don’t have to choose between a compiler and an interpreter; we can do both, via “just in time” or “hotspot” compiler. The program isn’t compiled to machine code unless that’s really needed (demonstrated by being in a hot spot)
+        * Popularized by Java, now common in languages elsewhere e.g. Chromium, Firefox, etc. to run JavaScript
+        * Dynamic linking is essential here. Take a piece of a program from a file, and link it into your running program. For example, Emacs can take a shared object file foo.so (containing machine code) and dynamically link it into Emacs, so you can then execute that code via Emacs Lismp.
+            * JVM can do the same thing via “native methods”
+            * Dynamic linking uses self-modifying code: the program calls the dynamic linker to change the program that’s running. This can be tricky, and can kill or subvert your program if link in bad or malicious code
+            * Self-modifying code is a key idea in CS, *but* dynamic linking is pretty dangerous
+            * We want most of the power of this, but we’d like to avoid the hazard
+* OCaml:
+    * Imperative commands, execution, modifying state C++, Java
+        * Functional expressions, evaluation
+        * Logic …
+    * Imperative languages suffer from side effects (actions that modify state and get you into trouble)
+    * Dynamic linking also suffers from side effects (actions that modify the program itself and get you into trouble)
+    * We’d like the advantages of building a program on the fly (flexibility - performance - etc) without dangers of dynamic linking
+    * In OCaml you can build a program on the fly without worrying about side effects messing you up, bc you build a program by gluing functions together, not by modifying already-existing code
+    * Compile-time type checking
+    * Don’t need to write down types most of the time like Python, scheme, scripting languages
+        * Thread x = new Thread (); //Java
+        * Let x = Thread();; //OCaml infers the type
+        * Type inference is a big deal in OCaml
+    * No need to worry about storage management, like Java and unlike C++
+        * C++ - new + del
+        * C - malloc + free
+        * OCaml - no ‘free’ or ‘del’; OCaml does that for you
+    * Good for support for higher-order functions (functions with functions as arguments, or that return return functions)
+    * OCaml in this course vs. ML in the book
+        * OCaml’s a bit cleaner
+        * OCaml:
+            * x < y && z < w
+            * 3.0 + 4.0
+            * [1;3;5]
+            * Let x = 5
+        * ML
+            * x<y and also z<w
+            * 3.0 + 4.0
+            * [1,3,5]
+            * Val x = 5
+
+OCAML
+* Every member of a list has to be of same type
+* [ ];;
+    * ‘a list = [ ]
+    * ‘a list … The ‘a is a *type variable*
+* let f = (fun x -> (x + 1));;
+    * val f : int -> int = <fun> 
+
+
+
+Java Virtual Machine (JVM)
+
+foo.java — javac —> Foo.class (byte code) —> Java interpretor executes java byte code
+Interpretor:
+	Bytecode-to-x86code: translates byte code to x86-64 machine code in memory — acts like a compiler (machine independent code -> machine code)
+	Translates hot spots (byte codes generated most often) to machine code
