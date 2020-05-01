@@ -1,0 +1,272 @@
+** Read every Webber chapter wth Java in title (3 chapters)
+
+Types
+
+terminology
+
+    "strongly typed" - all operations are type-checked
+        you cannot subvert the type discipline
+        you cannot cheat and mistreat a value's type
+
+        - safer
+        - but when types get in the way, then you can't get your work done
+
+        C, C++ are mostly strong typed but there are escape hatches
+            int x;
+            int *p = &x;
+            void *vp = p;
+            float *fp = vp;
+            *fp = 37.5;
+        OCaml, Java are strongly typed with no escape hatches
+        Python gives you no escape hatches
+
+    "abstract" vs "concrete" types
+
+        abstract type - implementation is hidden
+            you figure out what an object's value is only via operations on that object
+            'float' is sort of abstract in C
+                 you're not supposed to care where the s,e,f fields are
+                 on x86-64, s is the MSB. but it might be elsewhere. API for C doesn't specify.
+            Abstraction is an important tool in software engineering, because it provides modularization.
+        concrete type (or an exposed type) - implementation is known to programmer
+            typedef struct complex { double re; double im; };
+            User can do this:
+                cpl c; ...
+                c.re ...
+                ... &c.im ... // relies on the fact that have an exposed type
+            This gives you low-level access that gain efficiency.
+
+    Type equivalence
+
+        When are two types T and U the same?
+
+            Two ways to tell whether two types are equivalent.
+                - Structural equivalence - two types are the same if their internal strucure is the same. Or more generally, they're the same if they behave the same
+                    - In C/C++:
+                        typedef int T;
+                        typedef int U;
+                            T v;
+                            U *p = &v; //OK, because we're using structural equivalence here.
+                - Name equivalence - two types are the same if they have the same names
+                    - In C/C++:
+                        struct R { double re, im; };
+                        struct S { double re, im; };
+                            struct R v;
+                            struct S *p = &v; //not allowed because name equivalence
+                    Suppose C used structural equivalence here. Then struct R and struct S would be equivalent.
+                        struct T { int val; struct  *next; };
+                        struct U { int val; struct U *next; };
+
+                        struct V { int val; struct W *next; };
+                        struct W { int val; struct V *next; };
+                    Complexity of full structural equivalence argues against it being a language feature. How do you explain this stuff?
+
+Subtypes (T<U) ideally, T=U <-> T<U & U<T
+
+    examples:
+        Pascal
+            type alpha = 'a'...'z';
+            declares alpha to be a subtype of char.
+            var a: char;
+            var b: alpha;
+            a := b;   //always works
+            b := a;   // trouble because a might be out of range
+                How to deal with this?
+                1. Report error at compile time.
+                2. Runtime error (maybe checked, maybe not). This is actually done.
+        C++, Java, etc.:
+            subclass. parent P, child C, then C<P
+            A subclass has a *superset* of operations.
+                Every value of type C responds to all the operations of type P, because of inheritance.
+                It's possible for C to have operations P doesn't, but that's ok.
+        C/C++
+            'char *' vs ('char const*' == 'const char *')
+                    Aside on C/C++ syntax:
+                         'char * const *' : pointer to a const pointer to a char. read the type left to right.
+                    Aside on C/C++ semantics
+                        What does "const" mean? 
+                        - read-only storage? no
+                            char buf[1000];
+                            strcpy (buf, "abc");
+                            char c = *p; // 'a'
+                            buf[0] = 'x';
+                            char c = *p; //'x'
+                        - promise not to modify the storage via this pointer
+
+            Which is a subtype of the other?
+                char *p;
+                char const *q;
+                p = q; //OK??       q=p; //Trouble??
+
+                    char buf[1000];
+                    char *p = buf;
+                    char const *q = buf; //OK
+                    *q = 'x'; //Invalid -> compiler complains
+                    q = p;  //OK for the same reason that q = buf is OK
+
+                    char const str[4] = "xyz";
+                    char const *q = str; //safe
+                    char *p = str; //Compiler diagnoses trouble, because...
+                    *p = 'x'; //compiler won't complain because *p is of type char; BUT your program has a SEGV or something similar because str might be read only
+
+                    char const * = char *; is OK (assignment)
+                    char * = char const *; is bad (assignment)
+
+                Therefore, char * is a subtype of char const *. Can't assign parent type to subtype.
+                This is because there are MORE ops on char * than there are on char const *.
+                Therefore char * is the subtype.
+
+
+                char const * const * vs char **
+                    Is one of these a subtype of the other?
+                    Can you get into trouble if you allow the assingment?
+                        q = p;  is obviously bad.
+                        p = q;  is this OK?
+                            This is allowed in C++, because it knows about this case.
+                            It's not allowed in C, because C has simpler rules.
+                        *Rule complexity* is an issue here. 
+                        You've seen this in OCaml's type-error messages.
+
+Polymorphism
+
+    a + b       in C "works" if a and b are both int, or both float, or both long, or both unsigned long, etc. but you get a different operation for each of these combinations i.e. actually different machine code!
+
+    polymorphism - an operation that accepts many forms (or types) is "polymorphic"
+        common compile-time notion (pretty much every language with static type-checking has it)
+        run-time type checking also polymorphism
+
+    Polymorphism is a general notion
+
+        ad-hoc polymorphism - grew up organically in Fortran, C, etc.
+            each individual rule sort of make sense
+            little overall organization
+
+        
+
+
+
+        overloading - identify an operation of function of examining the types of its operands (or in some cases by also examining its context)
+            cos(x)  x could be 'float' (32-bit) or 'double' (64-bit)
+                float cos(float); two dif machine-code functions
+                double cos(double); with two ABIs/APIs
+                    Compiler decides which to call by looking at the type of argument.
+                cos(3.5)    3.5 is 'double', so it calls the 64-bit version
+                cos(3.5f)   3.5f is 'float'
+                If you had just one 64-bit 'cos', it'd (1) be slower (2) wrong for 32-bit arguments because of double rounding
+                complex --
+
+            How to implement multiple functions with same name at the assembly-level language? Answer: "name mangling".
+                float cos(float); two dif machine-code functions cos$f at machine level
+                double cos(double); with two ABIs/APIs cos$d at machine level
+            This means that if you compile parts of your program with GCC, and other parts with Microsoft cc, they have to agree about how names are mangled, exactly.
+            In some languages, overloading also depends on the context; this is more complicated
+
+        coercion - type conversion done implicitly in order to get your expressions to work.
+            int + int
+            unsigned + unsigned
+            long + long
+            unsigned long + unsigned long
+            unsigned long long + unsigned long long
+            float + float
+            double + double
+            long double + long double
+            
+            9 types, no mixed ops
+
+            There is no arithmetic on char, signed char, unsigned char, short, unsigned short (5 types with no arithmetic at all!)
+
+                int + unsigned does not exist
+
+            We should have 14*14 oeprations but we only have 9. We've saved ourselves a lot of work by having coercions.
+
+                - All types narrower than 'int' just promote to 'int'. This conversion does not change numeric value.
+                - When you have a type mismatch, the narrower type is coerced to the wider (does not change numeric value either)
+                    int + long (convert int to long, get long + long)
+                    unsigned + long (convert unsigned to long, get long + long)
+                - Type mismatch but same width: unsigned wins
+                    int + unsigned (convert into to unsigned, get unsigned + unsigned)
+
+                int i,j;
+                long j;
+                ...
+                i = j+l;    //If result doesn't fit, convert back
+                            // (which can lose info; this is typical) or
+                            // trap (your program crashes reliably; in debugging)
+
+                This means languages grow linearly with number of arithmetic types.
+
+                What about negative values?
+
+                    int i = -1; 
+                    unsigned j = i; //coercion that *changes* numeric value
+                        j == UINT_MAX == 2**32 - 1 on most machines.
+                    unsigned short k = i; //coercion that loses information
+                        j == USHRT_MAX == 2**16 - 1 on most machines
+                    if (i==j) //This coerces i to be unsigned 
+                        printf("equal!");
+                    unsigned i = -1;
+                    unsigned z = 0;
+                    if (i<z)
+                        printf ("ok");
+
+                    if (-1 < 21494580223)
+                        printf("makes numeric sense");
+                    else
+                        printf("nonsense"); //This is what is printed!
+                
+                    if (-2319432423 < 0)
+                        printf("makes numeric sense");
+                    else
+                        printf("nonsense"); //happens because 2319432423 doesn't fit an int so is an unsigned. Negative sign applied still is unsigned.
+
+                interaction between overloading and coercion
+                    int f (double, int);
+                    int f  (int, double);
+
+                        f(3, 5);    //In C++, if there are multiple ways to overload and coerce, computer doesn't know what to do
+
+            Can be trouble.
+                In OCaml, you can't do '2 + 3.5' or '1.2 + 3.5'
+                    You must say '2 + 3' or '1.2 +. 3.5'.
+                
+    Parametric polymorphism
+
+        Don't have a bunch of ad-hoc rules. A function's type or an operation's type can contain one or more type variables. 
+
+        Example frOM Java:
+
+            //code without parametric polymorphism (original Java)
+            public interface List {
+                void add (Object);
+                Iterator iterator();
+            }
+            public interface Iterator {
+                Object next();
+                ...
+            }
+            List c; ....; //a big list - collection of objects
+            //Removes all length-1 strings from c
+            for (Iterator i = c.iterator(); i.hasNext(); )
+                if ((String)i.next().length() == 1)     //length method is for strings. Need to cast to string.
+                    i.remove();
+            //This has a runtime check we don't Need
+
+        Now, Java has generic types that use parametric polymorphism
+
+            public interface List<E>{   //E is a type variable
+                void add (E);
+                Iterator iterator();
+            }
+            public interface Iterator<E> {
+                E next();
+                bool hasNext;
+                void remove();
+                ...
+            }
+            List c; ....;
+            for (Iterator i = c.iterator(); i.hasNext(); )
+                if ((String)i.next().length() == 1)
+                    i.remove();
+
+
+            
