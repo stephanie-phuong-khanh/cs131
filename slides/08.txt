@@ -1,0 +1,125 @@
+Polymorphism = 'many forms'
+
+AD HOC polymorphism = funciton or operator has at least two possible types but only finitely many possible types
+
+UNIVERSAL polymorphism = infinitely many possible types
+
+(1) Overloading
+    ad hoc because each type needs definition and you cannot write infinite definitions in program
+(2) Coercion
+    ad hoc bc there are certain number of types that can be coerced into the defined parameter type
+(3) Parametric polymorphism
+    universal polymorphism can be adapted to any type variables
+(4) Subtype polymorphism
+    universal because unlimited number of sybtypes declarable for a given type - true for class-bassed OOP languages like Java
+
+---
+
+OVERLOADED function name or operator - has at least two definitions, all of different types
+
+C++ lets all operators to be overloaded:
+    the usual shit like +, -, *, /, etc
+    dereferencing *p and p->x
+    subscript a[i]
+    function call f(a,b,c)
+    allocation and deallocation: new, delete
+
+    functon names: 
+        int square(int x) ...
+        double square(double x) ...
+
+Compilers implement:
+    Make 1 function that does one thing for each definition
+    Make MANGLED name for each that encodes type of info
+    Reference each with its mangled name, depending on type of parameter
+
+---
+
+Parameter COERCION - implicit type conversion even if programmer doesn't say so
+
+Java:               double x;
+                    x = 2;
+
+    instead of      double x;
+                    x = (double) 2;
+
+
+Coercion of PARAMETERS on a function call -> function is POLYMORPHIC
+
+    [Java] f can be called with any type of parameter that Java is willing to coerce to type double
+
+    void f(double x) {...}
+
+    f((byte) 1); 
+    f('a'); 
+    f(4L);  ..etc
+
+ML does not do coercion 
+
+
+OVERLOADING vs COERCION
+    Overloading = types to choose definition
+        Based on what the arguments we provide a function, different versions of the function are chosen
+    Coercion = definition to choose type conversion
+        Based on the function, the arguments are coerced.
+
+
+---
+
+PARAMETRIC Polymorphism
+
+function has type with one or more type variables
+    polytype = type with type variables
+    ML, C++, Java
+
+C++ function templates [Function templates are special functions that can operate with generic types. This allows us to create a function template whose functionality can be adapted to more than one type or class without repeating the entire code for each type]
+    template<class X>
+    X max(X a, X b) {
+        return a>b ? a : b;
+    } 
+
+ML 
+    fun identity x = x; 
+    val identity = fn : 'a -> 'a 
+
+    identity 3;
+    val it = 3 : int 
+
+We could do this by:
+    (1) Many monomorphic implementations, one for each type parameter given to compiler
+        Optimized for individual types
+    (2) One implementation used for all type parameters 
+        This is TRUE universal polymorphism: 1 copy
+        Not optimized for individual types
+    (3) anything in between
+
+---
+
+SUBTYPE Polymorphism - Function or operator has one or more parameter types having subtypes
+
+    OOP (Java) - ManualCar is subtype of Car
+    Function g has unlimited number of types, one for every class we define that is subtype of Car
+
+    class Car {
+        void brake() { … }
+    } 
+
+    class ManualCar extends Car {
+        void clutch() { … }
+    } 
+
+    void g(Car z) {
+        z.brake();
+    } 
+
+    void f(Car x, ManualCar y) {
+        g(x);   //Called on Car
+        g(y);   //Called on ManualCar
+    } 
+
+---
+
+Polymorpism also for variables, classes, packages, languages, etc.
+Runtime method dispatch = x.f() can call dif methods depending on runtime class of object x
+
+

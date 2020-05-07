@@ -1,0 +1,34 @@
+Four famlies
+---
+
+
+1) IMPERATIVE
+    assignment, iteration, order of execution matters
+    Any imperative language that supports recursion can be used as a functional language
+    e.g. C
+
+2) FUNCTIONAL
+    single valued variables, no assignment
+    recursion, not iteration -- need call stack support
+    uses many small side-effect-free functions
+    e.g. ML, Lisp
+
+3) LOGIC
+    program is expressed as rules in formal logic
+    uses searches in logically-defined problem space
+    e.g. Prolog
+
+4) OBJECT ORIENTED
+    usually imperative
+    constructs to help us use OBJECTS - bundles of data that know how to do stuff
+    e.g. Java (Internet?)
+
+
+Turing equivalence
+Languages have different strengths, but fundamentally they all have the same power
+...and all have the same power as various mathematical models of computation
+
+    {problems solvable in Java}
+    = {problems solvable in Fortran} 
+    ={problems solvable by Turing machine}
+    = {problems solvable by lambda calculus} 

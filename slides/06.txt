@@ -1,0 +1,129 @@
+Type
+
+= set of values + low-level representation + operations that can be used on those values
+
+saying: int n; -> saying values the variable n can have are elements of a certain set
+
+---
+
+Primitive vs. Constructed Types
+
+PRIMITIVE type = program can use but can't define for itself 
+    ML - int, real, char
+    Java - byte, char, short, int, long 
+    C - char, unsigned char, short int, int, long int, etc.
+
+    defined by language definiton
+
+    Level of freedom you have with primitive types is up to the language.
+
+    Java defines exactly the set for each primitive type
+        -> program runs exactly the same on different platforms (applets on web brosers)
+    
+    C and ML allow different implementations to define primitive types differently
+        -> compilers can generate efficient machine language code for different processors 
+
+    Since a language usually has relatively few’ primitive types, a large and expressive type system must be built with constructed types. Most modern languages have a collection of type constructors that is expressive: enough to construct infinitely many types.
+
+
+CONSTRUCTED type = program *can* define types for itself using the primitive types
+    ML - "'int list" constructed with primitive type int and list type constructor
+    
+    (1) ENUMERATED TYPES - define a new type (= set) and collection of named constants of that type (= elements)
+        ML: datatype day = M | Tu | W | Th | F | Sa | Su; 
+        C: enum coin {penny, nickel, dime, quarter};
+
+        Represent values of enum has small integers
+        C: enum coin {penny=1, nickel=5, dime=10, quarter=25};
+        int x = penny + nickel + dime;
+
+
+    (2) TUPLING = Cartesian product of two or more sets defines sets of tuples
+        S = X x Y 
+        = {(x,y)| x element of X and y element of Y}
+
+        ML supports real tuples:
+            fun get1 (x : real * real) = #1 x;
+        
+        C:
+            struct complex {
+                double rp;
+                double ip;
+            };
+
+        put elements side by side in memory
+
+    (3) VECTORS - fixed size or arbitrary size
+        arrays, strings, lists
+        Indices - what are index values (ints?), array fixed size at compile time?
+
+    (4) UNION - new set formed by taking union of existing sets
+        - may be thought of as a structure all of whose members begin at offset 0 and whose size is sufficient to contain any of its members
+        - at most one of the members can be stored in a union at any time
+
+        Supported by C and ML explicitly
+        C:  union element {
+                int i;
+                float f;
+            }; 
+
+        Representations can overlap each other in memory
+            Size of union = Size of larger of two representations (int or char)
+
+        STRICTLY TYPED
+            ML - can only extract contents of union and must say what to do with each type of value in union (?)
+
+        LOOSELY TYPED
+            Some languages expose the details of union implementation 
+
+        VARIANT RECORDS are middle grounds
+            Union where specific type is linked to the value of a field (“discriminated union”) 
+
+    (5) SUBSETS
+         define the subset selected by any predicate P
+            S = {x element of X | P(x)}
+
+    (6) SUBTYPES  = subset of values that can support superset of operations
+        Usually, supports all the same operations that are supported on the superty pe, if not more operations that wouldn't make sense on supertype  
+
+    (7) CLASSES - OOP
+        can be a type: data and operations on that data, bundled together
+
+        subclass is subtype: subset of objects, supports superset of operations
+
+    (8) SETS OF FUNCTIONS = define the set of functions with a given domain and range
+        clear in ML and C
+
+--- [uses for types]
+
+TYPE ANNOTATIONS
+    programmer uses these to give static type info to language system
+    defines the inputs and outputs for a function
+
+TYPE INFERENCE
+    taken to extreme by ML - infers static type for every expression and every function, needs no annotations
+
+TYPE CHECKING --> STATIC AND DYNAMIC TYPING!!!
+    STATIC TYPING
+        determines type for everything at compile time before running program -> error at compile time when static types inconsistent
+
+        C++ is static but not strongly typed because you can use pointers
+
+    DYNAMIC TYPING
+        checks at runtiem that operands are of suitable types 
+        Lisp: (defun f (a b) (+ a b))
+                improper call (f nil nil) caught at runtime  
+
+    STRONG TYPING - type checks strong enough to guarantee no type errors when program is run
+
+    WEAK TYPING - compiler does not enforce a typing discpline, or perhaps that enforcement can easily be subverted.
+
+TYPE EQUIVALENCE ISSUES
+
+    NAME equivalence = types are same iff same name
+
+    STRUCTURAL equivalence = types are same iff built from same primitive types using same type constructors in same order
+        must see how types are implemented and what operations you can do on the type
+
+    
+

@@ -1,0 +1,132 @@
+Language Systems
+---
+
+Classical sequence of steps to run a program
+
+1. Programmer creates with editor a text file of program.
+2. Compiler translates to assemly language
+    Machine specific
+    Each line = data or machine-level instruction
+3. Assembler converts each assembly-level insn to machine language (machine's binary format)
+    Needs to have memory addresses
+    Cannot read shit
+    -> OBJECT FILE
+4. Linker collects and combines different parts
+    Object file needs more parts, still has names, not all machine language
+    -> EXECUTABLE FILE
+5. Loader loads program into memory and replaces names with addresses when it runs program
+    Replaces names in executable with addresses in memory
+6. Processor runs program by executing instructions
+
+    editor
+                source file
+    compiler
+                assembly-language file
+    assembler
+                object file
+    linker
+                executable file
+    loader
+                run program in memory
+
+Optimization
+    make faster and/or smaller
+    done by compiler, assembler, linker, and/or loader
+
+    Loop invariant removal - done by most compilers so programmers don't have to
+
+---
+
+Variations on this
+
+Combine compile-assemble-link
+    gcc main.c -- source code -> executable file
+
+IDE - single interface to edit, run, debug programs
+    Editor knows syntax language
+    Version control
+    Rebuilds coordinated like 'make' for dif languages
+    Debugger
+
+Interpretor - execute steps a program specifies without translating program to lower level language
+    slower to run program because each step is processed in software
+    compilers have compile time but execution time faster
+
+VM - when no hardware, intermediate code produced
+    VM is simulated in software --> interpreted!
+    an actual language does whole classical sequence but then interpret resulting intermediate-code program
+
+    VM can be run in software on different platforms
+
+    Safer because program in VM isn't in charge and get clapped by interpretor if it tryna do some shady shit
+
+JVM - Java code compile to code for this java VM
+    JVM language called bytecode
+    Bytecode interpretor part of web browser - Java applet
+
+INTERMEDIATE LANGUAGE SPECTRUM:
+    Pure interpretor                high level language 
+    Tokenizing interpretor          token stream
+    Intermediate code compiler      VM language
+    Native code compiler            physical machine language
+
+Delayed linking - library function code not in executable of calling program
+    Windows: library functions in .dll files (dynamic-link library)
+        2 flavors
+            (1) load-time DL - loader finds .dll and links right before running
+            (2) run-time DL - running pgm does system calls to find .dll files and load functions
+    Unix:   library functions in .so files (shared object)
+        2 flavors
+            (1) shared libraries - loader links program to functions it needs before running
+            (2) dynamically loaded libraries - running pgm makes system calls to get libraries and functions
+    Java:   JVM automatically loads and links classes when a program uses them
+        
+    Good shit
+    - Programs can share copy of library functions - 1 copy on disk and in memory
+    - Library functions updated independently of programs
+    - Don't load code that isn't used
+
+Profiling - run classical sequence twice
+    (1) calls stats: parts most frequently executed
+    (2) generates better code with this info
+        
+Dynamic Compilation - sometimes after program starts running
+    - compile function when called
+    - interpret first, compile frequenly called functions
+    - compile roughly -> spend time on frequenly executed pieces
+    - aka JIT Compilation
+
+---
+
+Binding = associate a property with an identifier from the program
+
+Binding Times in reference to classical sequence
+- Language definition time - bound when language is defined e.g. meaning of keywords like for, if
+- Language implementation time - when language system written e.g. range of int values in C
+- Compile time - pgm compiled or prepped for interpretation e.g. types of variables
+- Link time - separately compiled program parts are combined into an executable e.g. object code for external function names
+- Load time - loaded into memory e.g. memory locations for functions and static variables
+- Runtime - e.g. variable values, types (Lisp dynamic typing)
+
+Late -> flexible at Runtime
+Early -> faster and more secure at Runtime
+
+    ** Dynamic typing refers to when a language is more agnostic to data types until the program executes
+
+---
+
+Debug 
+
+Look at 
+    snapshot - core dump
+    running program - break point, single stepping, etc.
+    change currently running pgm - recompile, relink, reload
+    
+---
+
+Runtime support - linker adds code to
+    startup processing
+    exception handling
+    manage memory
+    OS interface
+

@@ -1,0 +1,109 @@
+Program Syntax
+---
+
+SYNTAX = how programs look
+    defined with formal grammar
+
+SEMANTICS = what programs do
+    behavior and meaning
+    hard to defined
+
+Ireland has leprechauns galore
+    bad syntax, good semantics
+
+Colorless green ideas sleep furiously
+    good syntax, bad semantics
+
+Times flies
+    ambiguity in how to parse sentence even though correct in semantics and syntax 
+
+---
+
+grammar is set of rules on how to build a parse tree
+    <S> at root
+    defines how children can be added to node
+expression can be _ of two expressions
+    sum:        <exp> + <exp>
+    product:    <exp> * <exp>
+    parenthesized subexpression:    (<exp>)
+    .....OR one of 'terminal' variables a,b,c
+
+
+BNF Grammar:
+    (1) set of TOKENS
+        smallest units of syntax (leaves)
+    (2) set of NONTERMINAL SYMBOLS
+        <brackets>
+        not strings that actually occur in text
+        can be expanded into tokens
+    (3) START SYMBOL
+        root of parse tree
+    (4) set of PRODUCTOINS
+        rules that build tree
+        nonterminal ::= sequence of one or more strings (T or NT) in order as children in parse tree
+        OR lhs ::= rhs1 | rhs2 | rhs 3
+
+    <empty> = grammar generates nothing
+
+PARSING = finding parse tree for strings
+    compiler builds tree for program with grammar of language (syntax)
+
+LANGUAGE = set of all strings that can be derived by some parse tree for the grammar
+    set if often infinite
+
+
+float a;
+<var-dec> ::= <type-name> <declarator-list> ;
+<type-name> ::= boolean | byte | short;
+<declarator-list> :: = <declarator> 
+                    | <declarator> , <declarator-list>
+<defined> ::= <variable-name> | <variable-name> = <expr>
+
+
+TOKENS  
+    identifiers (count), keywords (if), operators (=), constants (123.4)
+
+        scanner     parser
+    text ---> tokens ---> program
+
+    PHRASE STRUCTURE = how program is built from tokens
+    LEXICAL STRUCTURE = how to divide text file (series of characters) into sequnce of tokens
+    
+    Separate grammars for each conversion (or else we'd use characters as tokens -> there can be spaces anywhere like in Fortran but thats nasty)
+        SCANNER = divides input file into tokens (1st grammar)
+        PARSER = tokens to parse tree (2nd grammar)
+
+    fixed-format = column positions matter
+    free-format = column positions are ignored
+
+
+EBNF - more syntax to simplify some grammar
+    { zero or more reps }
+    [ optional ]
+    ( choice1 | choice2 | choice3 )
+    ' token not meta-symbol '
+    X*  = zero or more Xs in a row
+    X+  = one or more Xs in a row
+
+    ISO STANDARDS
+        X* for repetition
+        X-Y for except
+        X,Y for concatenate
+        X|Y for or
+
+Syntax diagrams (railroad diagrams) - start with EBNF
+    chain of box = NT and oval = T
+    { zero or more reps } represented by loops
+    harder to precisely turn into parse tree, not as readable for machine (automatic parser-generator)
+
+
+CONTEXT SENSITIVE GRAMMAR
+    nonterminals depend on whats around it
+    Sb → aS 
+
+CONTEXT FREE GRAMMAR
+    a set of recursive rules used to generate patterns of strings
+    describe all regular languages and more, but they cannot describe all possible languages
+
+    S → aSb | X 
+    X → cX | ε 
